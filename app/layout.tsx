@@ -1,6 +1,9 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
 import Navbar from "@/components/navbar";
 
 const geistSans = Geist({
@@ -29,7 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased  flex flex-col`}
       >
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <NuqsAdapter>
+          <main className="flex-1">{children}</main>
+        </NuqsAdapter>
       </body>
     </html>
   );

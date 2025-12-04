@@ -19,10 +19,20 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Loader from "./loader";
+import { createPost } from "@/lib/post";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { getCategories } from "@/lib/category";
+import type { CategoryType } from "@/app/types";
 
 export const formSchema = z.object({
   title: z
@@ -33,19 +43,11 @@ export const formSchema = z.object({
     .string()
     .min(10, "Content must be at least 10 characters.")
     .max(100, "Content must be at most 100 characters."),
+  categoryId: z.string().min(1, "Category is required"),
 });
 
-const createPost = async (data: z.infer<typeof formSchema>) => {
-  await fetch("http://localhost:3000/api/posts", {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
-
 export default function CreatePostForm() {
+  const [categories, setCategories] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
@@ -54,8 +56,18 @@ export default function CreatePostForm() {
     defaultValues: {
       title: "",
       content: "",
+      categoryId: "",
     },
   });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const categories = await getCategories();
+      setCategories(categories);
+      console.log(categories);
+    };
+    fetchCategories();
+  }, []);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
@@ -95,6 +107,7 @@ export default function CreatePostForm() {
                 </Field>
               )}
             />
+
             <Controller
               name="content"
               control={form.control}
@@ -116,6 +129,42 @@ export default function CreatePostForm() {
                       </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="categoryId"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="post-category">Post Category</FieldLabel>
+                  <Select
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      id="form-rhf-select-language"
+                      aria-invalid={fieldState.invalid}
+                      className="min-w-[120px]"
+                    >
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent position="item-aligned">
+                      {categories.map((category: CategoryType) => (
+                        <SelectItem
+                          key={category.id}
+                          value={category.id.toString()}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

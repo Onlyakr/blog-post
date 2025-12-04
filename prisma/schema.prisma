@@ -10,8 +10,17 @@ model Post {
   id        Int     @id @default(autoincrement())
   title     String 
   content   String?
-  category  String? 
+  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
   createdAt DateTime @default(now())
 
   @@map("post")
+}
+
+model Category {
+ id Int @id @default(autoincrement())
+ name String
+ posts Post[]
+
+ @@map("category")
 }

@@ -1,20 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "./ui/button";
+import { deletePost } from "@/lib/post";
 
 import Link from "next/link";
-import { useState } from "react";
 import Loader from "./loader";
-
-const deletePost = async (id: string) => {
-  await fetch(`http://localhost:3000/api/posts/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
 
 const ActionButton = ({ id }: { id: string }) => {
   const [isDeleting, setIsDeleting] = useState(false);
